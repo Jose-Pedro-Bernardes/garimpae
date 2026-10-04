@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useSearch } from "@/hooks/use-search";
+import { SearchResults } from "@/components/search/search-results";
 
 export function Search() {
   const [query, setQuery] = useState("");
@@ -10,35 +11,38 @@ export function Search() {
   const { data, isLoading, error } = useSearch(submittedQuery);
 
   return (
-    <div>
+    <div className="flex w-full max-w-3xl flex-col gap-4">
+      <h1 className="text-3xl font-bold text-gray-800 dark:text-white">
+        Garimpaê
+      </h1>
+      <p className="text-gray-600 dark:text-gray-400">
+        Faça sua pesquisa de forma rápida e prática!
+      </p>
       <form
         onSubmit={(event) => {
           event.preventDefault();
           setSubmittedQuery(query.trim());
         }}
+        className="flex w-full max-w-3xl gap-2"
       >
         <input
           type="text"
           value={query}
           onChange={(event) => setQuery(event.target.value)}
-          placeholder="Pesquise por um estabelecimento"
+          placeholder="Ex: restaurantes em Niterói"
+          className="flex-1 rounded-lg border px-4 py-3 outline-none"
         />
 
-        <button type="submit">Pesquisar</button>
+        <button type="submit" className="rounded-lg px-5 py-3">
+          Pesquisar
+        </button>
       </form>
 
       {isLoading && <p>Carregando...</p>}
 
       {error && <p>Erro ao realizar pesquisa.</p>}
 
-      {data?.results.map((result) => (
-        <div key={`${result.name}-${result.address}`}>
-          <p>{result.name}</p>
-          <p>{result.address}</p>
-          <p>{result.phone}</p>
-          <p>{result.website}</p>
-        </div>
-      ))}
+      {data && <SearchResults results={data.results} />}
     </div>
   );
 }
