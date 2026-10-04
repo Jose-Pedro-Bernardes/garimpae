@@ -33,14 +33,22 @@ export function Search() {
           className="flex-1 rounded-lg border px-4 py-3 outline-none"
         />
 
-        <button type="submit" className="rounded-lg px-5 py-3">
-          Pesquisar
+        <button
+          type="submit"
+          disabled={isLoading}
+          className="rounded-lg px-5 py-3"
+        >
+          {isLoading ? "Pesquisando..." : "Pesquisar"}
         </button>
       </form>
 
       {isLoading && <p>Carregando...</p>}
 
       {error && <p>Erro ao realizar pesquisa.</p>}
+
+      {submittedQuery && data?.results.length === 0 && (
+        <p>Nenhum resultado encontrado.</p>
+      )}
 
       {data && <SearchResults results={data.results} />}
     </div>

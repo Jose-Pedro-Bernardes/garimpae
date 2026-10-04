@@ -10,6 +10,12 @@ export async function GET(request: NextRequest) {
     );
   }
 
+  NextResponse.json({
+    results: [],
+  });
+
+  NextResponse.json({ error: "Erro de teste." }, { status: 500 });
+
   const apiKey = process.env.GOOGLE_PLACES_API_KEY;
 
   if (!apiKey) {
