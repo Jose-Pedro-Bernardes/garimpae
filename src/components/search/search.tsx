@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useSearch } from "@/hooks/use-search";
 import { SearchResults } from "@/components/search/search-results";
+import { exportToXlsx } from "@/services/export/xlsx";
 
 export function Search() {
   const [query, setQuery] = useState("");
@@ -41,6 +42,18 @@ export function Search() {
           {isLoading ? "Pesquisando..." : "Pesquisar"}
         </button>
       </form>
+
+      <button
+        type="button"
+        disabled={!data?.results.length || isLoading}
+        onClick={() =>
+          data?.results.length &&
+          exportToXlsx(data.results, "garimpae-resultados.xlsx")
+        }
+        className="rounded-lg px-5 py-3"
+      >
+        Exportar XLSX
+      </button>
 
       {isLoading && <p>Carregando...</p>}
 

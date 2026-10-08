@@ -7,6 +7,7 @@ import userEvent from "@testing-library/user-event";
 import { render, screen } from "@testing-library/react";
 import { Search } from "./search";
 import { useSearch } from "@/hooks/use-search";
+import { exportToXlsx } from "@/services/export/xlsx";
 
 jest.mock("@/hooks/use-search", () => ({
   useSearch: jest.fn(() => ({
@@ -14,6 +15,10 @@ jest.mock("@/hooks/use-search", () => ({
     isLoading: false,
     error: null,
   })),
+}));
+
+jest.mock("@/services/export/xlsx", () => ({
+  exportToXlsx: jest.fn(),
 }));
 
 describe("Search", () => {
@@ -114,5 +119,49 @@ describe("Search", () => {
     await user.click(screen.getByRole("button", { name: "Pesquisar" }));
 
     expect(useSearch).toHaveBeenLastCalledWith("restaurantes");
+  });
+
+  it("deve exportar os resultados da pesquisa atual", async () => {
+    const user = userEvent.setup();
+
+    const results = [
+      {
+        name: "Restaurante Teste",
+        address: "Niterói - RJ",
+        phone: "+55 21 99999-9999",
+        website: "https://example.com",
+      },
+    ];
+
+    jest.mocked(useSearch).mockReturnValue({
+      data: {
+        results,
+      },
+      isLoading: false,
+      error: null,
+    } as unknown as ReturnType<typeof useSearch>);
+
+    render(<Search />);
+
+    await user.click(screen.getByRole("button", { name: "Exportar XLSX" }));
+
+    expect(exportToXlsx).toHaveBeenCalledWith(
+      results,
+      "garimpae-resultados.xlsx",
+    );
+  });
+
+  it("deve desabilitar a exportação quando não houver resultados", () => {
+    jest.mocked(useSearch).mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      error: null,
+    } as unknown as ReturnType<typeof useSearch>);
+
+    render(<Search />);
+
+    expect(
+      screen.getByRole("button", { name: "Exportar XLSX" }),
+    ).toBeDisabled();
   });
 });
