@@ -2,7 +2,7 @@
  * @jest-environment jsdom
  */
 
-import { renderHook, waitFor } from "@testing-library/react";
+import { act, renderHook, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { ReactNode } from "react";
 import { useSearch } from "./use-search";
@@ -130,5 +130,66 @@ describe("useSearch", () => {
         new Error("Erro ao realizar pesquisa."),
       );
     });
+  });
+
+  it("deve acumular resultados ao carregar a próxima página", async () => {
+    const wrapper = createWrapper();
+
+    const firstResult = {
+      name: "Restaurante A",
+      address: "Centro - Niterói",
+      phone: "+55 21 11111-1111",
+      website: "https://restaurante-a.com",
+    };
+
+    const secondResult = {
+      name: "Restaurante B",
+      address: "Icaraí - Niterói",
+      phone: "+55 21 22222-2222",
+      website: "https://restaurante-b.com",
+    };
+
+    const fetchMock = jest
+      .fn()
+      .mockResolvedValueOnce({
+        ok: true,
+        json: jest.fn().mockResolvedValue({
+          results: [firstResult],
+          nextPageToken: "token-segunda-pagina",
+        }),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: jest.fn().mockResolvedValue({
+          results: [secondResult],
+        }),
+      });
+
+    global.fetch = fetchMock as typeof fetch;
+
+    const { result } = renderHook(() => useSearch("restaurantes"), {
+      wrapper,
+    });
+
+    await waitFor(() => {
+      expect(result.current.data?.results).toEqual([firstResult]);
+    });
+
+    expect(result.current.hasNextPage).toBe(true);
+
+    await act(async () => {
+      await result.current.fetchNextPage();
+    });
+
+    await waitFor(() => {
+      expect(result.current.data?.results).toEqual([firstResult, secondResult]);
+    });
+
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      2,
+      "/api/search?q=restaurantes&pageToken=token-segunda-pagina",
+    );
+
+    expect(result.current.hasNextPage).toBe(false);
   });
 });

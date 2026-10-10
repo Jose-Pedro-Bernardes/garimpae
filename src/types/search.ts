@@ -11,4 +11,5 @@ export type SearchParams = {
 
 export type SearchResponse = {
   results: SearchResult[];
+  nextPageToken?: string;
 };
