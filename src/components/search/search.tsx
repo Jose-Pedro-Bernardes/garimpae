@@ -9,7 +9,14 @@ export function Search() {
   const [query, setQuery] = useState("");
   const [submittedQuery, setSubmittedQuery] = useState("");
 
-  const { data, isLoading, error } = useSearch(submittedQuery);
+  const {
+    data,
+    isLoading,
+    error,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+  } = useSearch(submittedQuery);
 
   return (
     <div className="flex w-full max-w-3xl flex-col gap-4">
@@ -64,6 +71,19 @@ export function Search() {
       )}
 
       {data && <SearchResults results={data.results} />}
+
+      {hasNextPage && (
+        <button
+          type="button"
+          disabled={isFetchingNextPage}
+          onClick={() => void fetchNextPage()}
+          className="rounded-lg px-5 py-3"
+        >
+          {isFetchingNextPage
+            ? "Carregando mais resultados..."
+            : "Carregar mais resultados"}
+        </button>
+      )}
     </div>
   );
 }

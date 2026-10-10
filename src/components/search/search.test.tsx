@@ -164,4 +164,38 @@ describe("Search", () => {
       screen.getByRole("button", { name: "Exportar XLSX" }),
     ).toBeDisabled();
   });
+
+  it("deve carregar a próxima página ao clicar no botão", async () => {
+    const user = userEvent.setup();
+    const fetchNextPage = jest.fn();
+
+    jest.mocked(useSearch).mockReturnValue({
+      data: {
+        results: [
+          {
+            name: "Restaurante A",
+            address: "Centro - Niterói",
+            phone: "+55 21 11111-1111",
+            website: "https://restaurante-a.com",
+          },
+        ],
+        nextPageToken: "token-proxima-pagina",
+      },
+      isLoading: false,
+      error: null,
+      hasNextPage: true,
+      isFetchingNextPage: false,
+      fetchNextPage,
+    } as unknown as ReturnType<typeof useSearch>);
+
+    render(<Search />);
+
+    await user.click(
+      screen.getByRole("button", {
+        name: "Carregar mais resultados",
+      }),
+    );
+
+    expect(fetchNextPage).toHaveBeenCalledTimes(1);
+  });
 });
