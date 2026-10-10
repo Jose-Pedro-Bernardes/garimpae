@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
   const query = request.nextUrl.searchParams.get("q");
+  const pageToken = request.nextUrl.searchParams.get("pageToken");
 
   if (!query) {
     return NextResponse.json(
@@ -9,12 +10,6 @@ export async function GET(request: NextRequest) {
       { status: 400 },
     );
   }
-
-  NextResponse.json({
-    results: [],
-  });
-
-  NextResponse.json({ error: "Erro de teste." }, { status: 500 });
 
   const apiKey = process.env.GOOGLE_PLACES_API_KEY;
 
@@ -33,10 +28,11 @@ export async function GET(request: NextRequest) {
         "Content-Type": "application/json",
         "X-Goog-Api-Key": apiKey,
         "X-Goog-FieldMask":
-          "places.displayName,places.formattedAddress,places.nationalPhoneNumber,places.websiteUri",
+          "places.displayName,places.formattedAddress,places.nationalPhoneNumber,places.websiteUri,nextPageToken",
       },
       body: JSON.stringify({
         textQuery: query,
+        ...(pageToken ? { pageToken } : {}),
       }),
     },
   );
@@ -66,5 +62,6 @@ export async function GET(request: NextRequest) {
 
   return NextResponse.json({
     results,
+    ...(data.nextPageToken ? { nextPageToken: data.nextPageToken } : {}),
   });
 }

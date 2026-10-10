@@ -69,6 +69,7 @@ describe("GET /api/search", () => {
                   websiteUri: "https://example.com",
                 },
               ],
+              nextPageToken: "token-proxima-pagina",
             }),
             {
               status: 200,
@@ -97,6 +98,7 @@ describe("GET /api/search", () => {
               website: "https://example.com",
             },
           ],
+          nextPageToken: "token-proxima-pagina",
         });
       });
 
@@ -245,12 +247,40 @@ describe("GET /api/search", () => {
             "Content-Type": "application/json",
             "X-Goog-Api-Key": "test-api-key",
             "X-Goog-FieldMask":
-              "places.displayName,places.formattedAddress,places.nationalPhoneNumber,places.websiteUri",
+              "places.displayName,places.formattedAddress,places.nationalPhoneNumber,places.websiteUri,nextPageToken",
           },
           body: JSON.stringify({
             textQuery: "restaurantes",
           }),
         },
+      );
+    });
+    it("deve enviar o pageToken ao consultar a próxima página", async () => {
+      process.env.GOOGLE_PLACES_API_KEY = "test-api-key";
+
+      const fetchMock = jest.spyOn(global, "fetch").mockResolvedValue(
+        new Response(JSON.stringify({ places: [] }), {
+          status: 200,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }),
+      );
+
+      const request = new NextRequest(
+        "http://localhost:3000/api/search?q=restaurantes&pageToken=token-segunda-pagina",
+      );
+
+      await GET(request);
+
+      expect(fetchMock).toHaveBeenCalledWith(
+        "https://places.googleapis.com/v1/places:searchText",
+        expect.objectContaining({
+          body: JSON.stringify({
+            textQuery: "restaurantes",
+            pageToken: "token-segunda-pagina",
+          }),
+        }),
       );
     });
   });
