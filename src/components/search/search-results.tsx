@@ -15,7 +15,7 @@ export function SearchResults({ results }: SearchResultsProps) {
       {results.map((result) => (
         <li
           key={`${result.name}-${result.address}`}
-          className="flex gap-3 rounded-xl border border-border bg-surface p-4"
+          className="flex gap-3 rounded-xl border border-border bg-surface p-3 sm:p-4"
         >
           <div
             aria-hidden="true"

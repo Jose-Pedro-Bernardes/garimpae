@@ -33,22 +33,24 @@ export function Search() {
 
   return (
     <div className="flex w-full max-w-3xl flex-col gap-4">
-      <h1 className="text-3xl font-bold text-brand">Garimpaê</h1>
-      <p className="text-muted">Faça sua pesquisa de forma rápida e prática!</p>
+      <h1 className="text-2xl font-bold text-brand sm:text-3xl">Garimpaê</h1>
+      <p className="text-muted sm:text-sm">
+        Faça sua pesquisa de forma rápida e prática!
+      </p>
 
       <form
         onSubmit={(event) => {
           event.preventDefault();
           setSubmittedQuery(query.trim());
         }}
-        className="flex w-full max-w-3xl gap-2"
+        className="flex w-full max-w-3xl flex-col gap-2 sm:flex-row"
       >
         <input
           type="text"
           value={query}
           onChange={(event) => setQuery(event.target.value)}
           placeholder="Ex: restaurantes em Niterói"
-          className="flex-1 rounded-lg border border-border bg-surface px-4 py-3 text-foreground outline-none placeholder:text-muted focus:border-gold focus:ring-2 focus:ring-gold/40"
+          className="min-w-0 flex-1 rounded-lg border border-border bg-surface px-4 py-3 text-base text-foreground outline-none placeholder:text-muted focus:border-gold focus:ring-2 focus:ring-gold/40"
         />
 
         <button type="submit" disabled={isLoading} className={primaryButton}>
