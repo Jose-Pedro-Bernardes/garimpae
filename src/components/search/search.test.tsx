@@ -10,18 +10,25 @@ import { useSearch } from "@/hooks/use-search";
 import { exportToXlsx } from "@/services/export/xlsx";
 
 jest.mock("@/hooks/use-search", () => ({
-  useSearch: jest.fn(() => ({
-    data: undefined,
-    isLoading: false,
-    error: null,
-  })),
+  useSearch: jest.fn(),
 }));
 
 jest.mock("@/services/export/xlsx", () => ({
   exportToXlsx: jest.fn(),
 }));
 
+const defaultSearchState = {
+  data: undefined,
+  isLoading: false,
+  error: null,
+} as unknown as ReturnType<typeof useSearch>;
+
 describe("Search", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    jest.mocked(useSearch).mockReturnValue(defaultSearchState);
+  });
+
   it("deve renderizar o campo de pesquisa", () => {
     render(<Search />);
 
@@ -51,7 +58,7 @@ describe("Search", () => {
 
     await user.type(input, "restaurantes");
 
-    await user.click(screen.getByRole("button", { name: "Pesquisar" }));
+    await user.click(screen.getByRole("button", { name: "Garimpar" }));
 
     expect(useSearch).toHaveBeenLastCalledWith("restaurantes");
   });
@@ -61,13 +68,13 @@ describe("Search", () => {
       data: undefined,
       isLoading: true,
       error: null,
-    } as ReturnType<typeof useSearch>);
+    } as unknown as ReturnType<typeof useSearch>);
 
     render(<Search />);
 
-    expect(screen.getByText("Pesquisando...")).toBeInTheDocument();
+    expect(screen.getByText("Garimpando...")).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: "Pesquisando..." }),
+      screen.getByRole("button", { name: "Garimpando..." }),
     ).toBeDisabled();
   });
 
@@ -76,7 +83,7 @@ describe("Search", () => {
       data: undefined,
       isLoading: false,
       error: new Error("Erro ao realizar pesquisa."),
-    } as ReturnType<typeof useSearch>);
+    } as unknown as ReturnType<typeof useSearch>);
 
     render(<Search />);
 
@@ -100,7 +107,7 @@ describe("Search", () => {
 
     await user.type(input, "restaurantes");
 
-    await user.click(screen.getByRole("button", { name: "Pesquisar" }));
+    await user.click(screen.getByRole("button", { name: "Garimpar" }));
 
     expect(
       screen.getByText("Nenhum resultado encontrado."),
@@ -116,7 +123,7 @@ describe("Search", () => {
 
     await user.type(input, "  restaurantes  ");
 
-    await user.click(screen.getByRole("button", { name: "Pesquisar" }));
+    await user.click(screen.getByRole("button", { name: "Garimpar" }));
 
     expect(useSearch).toHaveBeenLastCalledWith("restaurantes");
   });
@@ -143,7 +150,7 @@ describe("Search", () => {
 
     render(<Search />);
 
-    await user.click(screen.getByRole("button", { name: "Exportar XLSX" }));
+    await user.click(screen.getByRole("button", { name: "Baixar Planilha" }));
 
     expect(exportToXlsx).toHaveBeenCalledWith(
       results,
@@ -152,16 +159,10 @@ describe("Search", () => {
   });
 
   it("deve desabilitar a exportação quando não houver resultados", () => {
-    jest.mocked(useSearch).mockReturnValue({
-      data: undefined,
-      isLoading: false,
-      error: null,
-    } as unknown as ReturnType<typeof useSearch>);
-
     render(<Search />);
 
     expect(
-      screen.getByRole("button", { name: "Exportar XLSX" }),
+      screen.getByRole("button", { name: "Baixar Planilha" }),
     ).toBeDisabled();
   });
 
