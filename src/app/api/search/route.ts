@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { reserveRequest } from "@/lib/usage-limit";
 
 export async function GET(request: NextRequest) {
   const query = request.nextUrl.searchParams.get("q");
@@ -20,28 +21,54 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  const response = await fetch(
-    "https://places.googleapis.com/v1/places:searchText",
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-Goog-Api-Key": apiKey,
-        "X-Goog-FieldMask":
-          "places.displayName,places.formattedAddress,places.nationalPhoneNumber,places.websiteUri,nextPageToken",
-      },
-      body: JSON.stringify({
-        textQuery: query,
-        ...(pageToken ? { pageToken } : {}),
-      }),
-    },
-  );
+  const usage = await reserveRequest();
 
-  const data = await response.json();
+  if (!usage.ok) {
+    return NextResponse.json(
+      { error: "Limite mensal de pesquisas atingido. Volte no próximo mês." },
+      { status: 429 },
+    );
+  }
+
+  let response: Response;
+
+  try {
+    response = await fetch(
+      "https://places.googleapis.com/v1/places:searchText",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Goog-Api-Key": apiKey,
+          "X-Goog-FieldMask":
+            "places.displayName,places.formattedAddress,places.nationalPhoneNumber,places.websiteUri,nextPageToken",
+        },
+        body: JSON.stringify({
+          textQuery: query,
+          pageSize: 20,
+          ...(pageToken ? { pageToken } : {}),
+        }),
+      },
+    );
+  } catch {
+    return NextResponse.json(
+      { error: "Não foi possível consultar o Google Places." },
+      { status: 502 },
+    );
+  }
+
+  const data = await response.json().catch(() => ({}));
 
   if (!response.ok) {
+    console.error("Google Places:", response.status, data.error?.message);
+
     return NextResponse.json(
-      { error: data.error?.message ?? "Erro ao consultar Google Places." },
+      {
+        error:
+          response.status === 429
+            ? "Limite diário do Google Places atingido. Tente novamente amanhã."
+            : "Erro ao consultar Google Places.",
+      },
       { status: response.status },
     );
   }
