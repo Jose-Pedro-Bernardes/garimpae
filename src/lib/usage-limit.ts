@@ -23,6 +23,10 @@ async function readUsage(): Promise<Usage> {
 let queue: Promise<unknown> = Promise.resolve();
 
 export function reserveRequest() {
+  if (process.env.VERCEL) {
+    return Promise.resolve({ ok: true, used: 0, limit: MONTHLY_LIMIT });
+  }
+
   const run = queue.then(async () => {
     const usage = await readUsage();
 
