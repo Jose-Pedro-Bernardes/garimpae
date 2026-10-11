@@ -192,4 +192,46 @@ describe("useSearch", () => {
 
     expect(result.current.hasNextPage).toBe(false);
   });
+
+  it("deve usar a mensagem de erro devolvida pela rota", async () => {
+    const wrapper = createWrapper();
+
+    const fetchMock = jest.fn().mockResolvedValue({
+      ok: false,
+      json: jest.fn().mockResolvedValue({
+        error: "Limite mensal de pesquisas atingido. Volte no próximo mês.",
+      }),
+    });
+
+    global.fetch = fetchMock as typeof fetch;
+
+    const { result } = renderHook(() => useSearch("restaurantes"), {
+      wrapper,
+    });
+
+    await waitFor(() => {
+      expect(result.current.error?.message).toBe(
+        "Limite mensal de pesquisas atingido. Volte no próximo mês.",
+      );
+    });
+  });
+
+  it("deve usar a mensagem padrão quando a resposta de erro não for JSON", async () => {
+    const wrapper = createWrapper();
+
+    const fetchMock = jest.fn().mockResolvedValue({
+      ok: false,
+      json: jest.fn().mockRejectedValue(new SyntaxError("Unexpected token")),
+    });
+
+    global.fetch = fetchMock as typeof fetch;
+
+    const { result } = renderHook(() => useSearch("restaurantes"), {
+      wrapper,
+    });
+
+    await waitFor(() => {
+      expect(result.current.error?.message).toBe("Erro ao realizar pesquisa.");
+    });
+  });
 });

@@ -199,4 +199,20 @@ describe("Search", () => {
 
     expect(fetchNextPage).toHaveBeenCalledTimes(1);
   });
+
+  it("deve exibir a mensagem de erro específica devolvida pela pesquisa", () => {
+    jest.mocked(useSearch).mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      error: new Error(
+        "Limite mensal de pesquisas atingido. Volte no próximo mês.",
+      ),
+    } as unknown as ReturnType<typeof useSearch>);
+
+    render(<Search />);
+
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "Limite mensal de pesquisas atingido. Volte no próximo mês.",
+    );
+  });
 });

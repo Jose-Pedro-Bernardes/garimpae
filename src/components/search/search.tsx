@@ -82,9 +82,12 @@ export function Search() {
       )}
 
       {error && (
-        <p className="flex items-center gap-2 text-red-700 dark:text-red-400">
+        <p
+          role="alert"
+          className="flex items-center gap-2 text-red-700 dark:text-red-400"
+        >
           <CircleAlert className="size-4 shrink-0" aria-hidden="true" />
-          Erro ao realizar pesquisa.
+          {error.message}
         </p>
       )}
 

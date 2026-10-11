@@ -17,7 +17,15 @@ export function useSearch(query: string) {
       const response = await fetch(`/api/search?${params.toString()}`);
 
       if (!response.ok) {
-        throw new Error("Erro ao realizar pesquisa.");
+        const body = (await response.json().catch(() => null)) as {
+          error?: unknown;
+        } | null;
+
+        throw new Error(
+          typeof body?.error === "string"
+            ? body.error
+            : "Erro ao realizar pesquisa.",
+        );
       }
 
       return (await response.json()) as SearchResponse;
