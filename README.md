@@ -1,36 +1,110 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Garimpaê
 
-## Getting Started
+Ferramenta de busca de estabelecimentos. Você pesquisa algo como **"restaurantes em Niterói"** e recebe uma lista com nome, endereço, telefone e site, que pode ser baixada em uma planilha XLSX.
 
-First, run the development server:
+## Funcionalidades
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- Pesquisa por texto livre (tipo de negócio + cidade).
+- Lista de resultados com nome, endereço, telefone e site.
+- Carregamento incremental: cada clique em **Carregar mais resultados** traz a próxima página.
+- Exportação dos resultados carregados para XLSX.
+- Tema claro e escuro, com layout responsivo.
+- Limite mensal de requisições à API (ativo em desenvolvimento local).
+
+## Tecnologias
+
+- [Next.js](https://nextjs.org/) (App Router) e [React](https://react.dev/)
+- [Tailwind CSS](https://tailwindcss.com/)
+- [TanStack Query](https://tanstack.com/query) para busca e cache
+- [Google Places API (New)](https://developers.google.com/maps/documentation/places/web-service) (Text Search)
+- [ExcelJS](https://github.com/exceljs/exceljs) para gerar a planilha
+- [lucide-react](https://lucide.dev/) para ícones
+- [Jest](https://jestjs.io/) e [Testing Library](https://testing-library.com/) para testes
+
+## Como rodar
+
+1. Clone o repositório e instale as dependências:
+
+   ```bash
+   git clone https://github.com/Jose-Pedro-Bernardes/garimpae.git
+   cd garimpae
+   npm install
+   ```
+
+2. Crie o arquivo `.env.local` na raiz do projeto:
+
+   ```env
+   GOOGLE_PLACES_API_KEY=sua-chave-aqui
+   ```
+
+3. Inicie o servidor de desenvolvimento:
+
+   ```bash
+   npm run dev
+   ```
+
+4. Abra [http://localhost:3000](http://localhost:3000).
+
+## Variáveis de ambiente
+
+| Variável | Descrição |
+| --- | --- |
+| `GOOGLE_PLACES_API_KEY` | Chave da Google Places API (New). Usada apenas no servidor, na rota `/api/search`. Nunca use o prefixo `NEXT_PUBLIC_`. |
+
+## Scripts
+
+| Comando | O que faz |
+| --- | --- |
+| `npm run dev` | Servidor de desenvolvimento |
+| `npm run build` | Build de produção |
+| `npm run start` | Executa o build de produção |
+| `npm run lint` | Verifica o código com o ESLint |
+| `npx tsc --noEmit` | Checa os tipos do TypeScript |
+| `npx jest` | Roda os testes automatizados |
+
+## Estrutura
+
+```text
+src/
+├── app/
+│   ├── api/search/route.ts      # Rota que consulta a Google Places API
+│   ├── globals.css              # Paleta e tokens do tema
+│   ├── layout.tsx
+│   └── page.tsx
+├── components/
+│   ├── providers/               # Provider do TanStack Query
+│   └── search/                  # Search e SearchResults
+├── hooks/use-search.ts          # Busca paginada com cache
+├── lib/
+│   ├── query-client.ts          # Configuração do cache
+│   └── usage-limit.ts           # Limite mensal de requisições
+├── services/export/xlsx.ts      # Geração do arquivo XLSX
+└── types/search.ts
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Consumo da API e limite mensal
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Cada pesquisa e cada clique em **Carregar mais resultados** contam como uma requisição à Google Places API, e o uso é cobrado depois da franquia gratuita mensal. Para ficar abaixo dela, o projeto tem:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- **Cache** de resultados por 5 minutos, sem nova requisição ao voltar para a aba.
+- **Sem tentativas automáticas** em caso de erro, para um erro não virar várias cobranças.
+- **Contador mensal** (800 requisições): ao atingir o limite, a rota responde `429` sem chamar o Google. O contador grava em `.data/usage.json`, que fica fora do Git.
 
-## Learn More
+> **Nota:** o contador em arquivo funciona em ambiente local. A migração para um contador compartilhado, que também funcione em hospedagem serverless, está planejada.
 
-To learn more about Next.js, take a look at the following resources:
+## Deploy
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+O projeto é publicado na [Vercel](https://vercel.com/). Cadastre `GOOGLE_PLACES_API_KEY` em **Settings → Environment Variables**. Variáveis novas só valem em deploys feitos depois delas, então faça um **Redeploy** após alterá-las.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Observações
 
-## Deploy on Vercel
+- Projeto de uso pessoal. O site está com indexação desativada (`robots: noindex`).
+- Os dados vêm da Google Places API. Antes de usar a ferramenta além do uso pessoal, leia os [termos do Google Maps Platform](https://cloud.google.com/maps-platform/terms), principalmente as regras sobre exportação e armazenamento de dados.
+- A chave de demonstração do Google serve apenas para testes e prototipagem.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Próximos passos
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- [ ] Contador de requisições em Redis, com bloqueio em 800 por mês
+- [ ] Página de consulta do consumo da API
+- [ ] Autenticação
+- [ ] Novo design de background
