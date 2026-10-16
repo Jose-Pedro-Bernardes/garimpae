@@ -23,10 +23,18 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="pt-BR"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       suppressHydrationWarning
     >
-      <body className="min-h-full flex flex-col">
+      <body className="relative isolate flex min-h-dvh flex-col overflow-x-hidden bg-background font-sans text-foreground">
+        <div
+          aria-hidden="true"
+          className="bg-garimpo-glow pointer-events-none absolute inset-0 -z-10 opacity-100 dark:opacity-10"
+        />
+        <div
+          aria-hidden="true"
+          className="bg-garimpo-icons pointer-events-none absolute inset-0 -z-10 opacity-100 dark:opacity-30"
+        />
         <QueryProvider>{children}</QueryProvider>
       </body>
     </html>
