@@ -106,4 +106,5 @@ O projeto é publicado na [Vercel](https://vercel.com/). Cadastre `GOOGLE_PLACES
 
 - [ ] Contador de requisições em Redis, com bloqueio em 800 por mês
 - [ ] Página de consulta do consumo da API
+- [ ] Página de apresentação
 - [ ] Autenticação
