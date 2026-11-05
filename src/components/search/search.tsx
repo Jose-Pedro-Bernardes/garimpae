@@ -32,7 +32,7 @@ export function Search() {
   } = useSearch(submittedQuery);
 
   return (
-    <div className="flex w-full max-w-3xl flex-col gap-4">
+    <section className="flex w-full max-w-3xl flex-col gap-4">
       <h1 className="text-2xl font-bold text-brand sm:text-3xl">Garimpaê</h1>
       <p className="text-muted sm:text-sm">
         Faça sua pesquisa de forma rápida e prática!
@@ -116,6 +116,6 @@ export function Search() {
             : "Carregar mais resultados"}
         </button>
       )}
-    </div>
+    </section>
   );
 }
