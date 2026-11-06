@@ -39,20 +39,23 @@ export function Search() {
       </p>
 
       <form
+        role="search"
         onSubmit={(event) => {
           event.preventDefault();
           setSubmittedQuery(query.trim());
         }}
         className="flex w-full max-w-3xl flex-col gap-2 sm:flex-row"
       >
+        <label htmlFor="searchQuery" className="sr-only" />
         <input
+          id="searchQuery"
+          name="q"
           type="text"
           value={query}
           onChange={(event) => setQuery(event.target.value)}
           placeholder="Ex: restaurantes em Niterói"
           className="min-w-0 flex-1 rounded-lg border border-border bg-surface px-4 py-3 text-base text-foreground outline-none placeholder:text-muted focus:border-gold focus:ring-2 focus:ring-gold/40"
         />
-
         <button type="submit" disabled={isLoading} className={primaryButton}>
           {isLoading ? (
             <Loader2 className="size-5 animate-spin" aria-hidden="true" />
